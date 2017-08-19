@@ -15,8 +15,10 @@ Each observation file presented 561 variables. Files were at:
 - test/x_test.txt
 
 Columns were not named. Names were got from ./features.txt file and attributed.
+After this only columns representing mean and stddev were selected.
+Everything else was dropped so we ended up with 79 variables.
 
-In the analysis the main observation files needed to be complemented with columns regarding:
+The main observation files needed to be complemented with columns regarding:
 - subject
 - type of activity
 
@@ -35,10 +37,8 @@ Table was loaded with contents of ./activity_labels.txt file.
 
 The 2 remaining added columns where named as "subject" and "activityDesc", and appear before the variables.
 
-To generate the frame with mean and sd for each variable, sapply was executed 2 times, each one
-generating a vector with one line for each variable for one statistic. The 2 vectors were the binded to generate a data frame.
-The names of the statistic columns were set as "mean" and "std dev".
-
 To obtain the statistics grouped by subject-activity, a grouped data frame was created and summarise_all function was
-executed. The resulting frame was then saved with no column titles as requested.
+executed. The resulting frame was then saved with no row names as requested.
+
+Column names for the data set are provided in names_tidy.txt file.
 

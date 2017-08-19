@@ -19,7 +19,12 @@ feat <- read.table("./features.txt",stringsAsFactors = FALSE)
 names(dtTrain) <- feat$V2
 names(dtTest) <- feat$V2
 
-## Reading subject data and attributing a clear column name
+## Selecting only variables on mean and std
+varSelect <- grepl(".*mean.*|.*std.*",feat$V2)
+dtTrain <-dtTrain[varSelect]
+dtTest <- dtTest[varSelect]
+
+## Reading subject data and attributing column names
 dtSubjTrain <- read.table("./train/subject_train.txt",stringsAsFactors = FALSE)
 names(dtSubjTrain) <- "subject"
 dtSubjTest <- read.table("./test/subject_test.txt",stringsAsFactors = FALSE)
@@ -33,15 +38,9 @@ names(activity)[2] <- "activityDesc"
 dtTrainLabels <- read.table("./train/y_train.txt",stringsAsFactors = FALSE)
 dtTestLabels <- read.table("./test/y_test.txt",stringsAsFactors = FALSE)
 
-## Binding columns to main files
-##
-## First subject column
-dtTrain <- cbind(dtSubjTrain,dtTrain)
-dtTest <- cbind(dtSubjTest,dtTest)
-
-## Now, activity code
-dtTrain <- cbind(dtTrainLabels,dtTrain)
-dtTest <- cbind(dtTestLabels,dtTest)
+## Binding activity and subject columns to main files
+dtTrain <- cbind(dtTrainLabels,dtSubjTrain,dtTrain)
+dtTest <- cbind(dtTestLabels,dtSubjTest,dtTest)
 
 ## Joining the main files for train and test
 dtJoin <- rbind(dtTrain,dtTest)
@@ -53,16 +52,6 @@ dtJoin <- merge(activity,dtJoin)
 
 ## Join column V1 was very useful but now can be dropped
 dtJoin <- select(dtJoin, -V1)
-
-## Generating the table with only the global statistics
-##
-## First creating 2 vectos, one for each statistic
-means <- sapply(dtJoin[,3:563],mean)
-sds <- sapply(dtJoin[,3:563],sd)
-## Now joining the 2 and getting the desired table
-measureStats <- data.frame(means,sds)
-## Better names pay off!
-names(measureStats) <- c("mean","std dev")
 
 ## Creating a grouped frame for the remaining steps
 dtJoinG <- group_by( dtJoin, .dots = c("subject", "activityDesc"))

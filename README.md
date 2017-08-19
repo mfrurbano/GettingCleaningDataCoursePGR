@@ -26,7 +26,14 @@ Script Explanation:
 	names(dtTrain) <- feat$V2
 	names(dtTest) <- feat$V2
 
-4 - Subject identifications are in separate files (one for train, one for test)
+4 - Now that we have column names we can select only the ones representing
+    mean or stddev measures
+	## Selecting only variables on mean and std
+	varSelect <- grepl(".*mean.*|.*std.*",feat$V2)
+	dtTrain <-dtTrain[varSelect]	
+	dtTest <- dtTest[varSelect]
+
+5 - Subject identifications are in separate files (one for train, one for test)
     We will now read them and attribute a good column name
 	## Reading subject data and attributing a clear column name
 	dtSubjTrain <- read.table("./train/subject_train.txt",stringsAsFactors = FALSE)
@@ -34,31 +41,26 @@ Script Explanation:
 	dtSubjTest <- read.table("./test/subject_test.txt",stringsAsFactors = FALSE)
 	names(dtSubjTest) <- "subject"
 
-5 - Activities descriptions will be needed => read and name the column
+6 - Activities descriptions will be needed => read and name the column
 	## Reading activity descriptions and attributing a clear column name
 	activity <- read.table("./activity_labels.txt",stringsAsFactors = FALSE)
 	names(activity)[2] <- "activityDesc"
 
-6 - Activity identification is also apart of main data files => reading files now
+7 - Activity identification is also apart of main data files => reading files now
 	## Reading activity code files
 	dtTrainLabels <- read.table("./train/y_train.txt",stringsAsFactors = FALSE)
 	dtTestLabels <- read.table("./test/y_test.txt",stringsAsFactors = FALSE)
 
-7 - Now the separate columns will be added to the main files
-	## Binding columns to main files
-	##
-	## First subject column
-	dtTrain <- cbind(dtSubjTrain,dtTrain)
-	dtTest <- cbind(dtSubjTest,dtTest)
-	## Now, activity code
-	dtTrain <- cbind(dtTrainLabels,dtTrain)
-	dtTest <- cbind(dtTestLabels,dtTest)
+8 - Now the separate columns will be added to the main files
+	## Binding activity and subject columns to main files
+	dtTrain <- cbind(dtTrainLabels,dtSubjTrain,dtTrain)
+	dtTest <- cbind(dtTestLabels,dtSubjTest,dtTest)
 
-8 - Train and test observations are requested to be joined
+9 - Train and test observations are requested to be joined
 	## Joining the main files for train and test
 	dtJoin <- rbind(dtTrain,dtTest)
 
-9 - The activities are represented by codes that must be changed into descriptions
+10 - The activities are represented by codes that must be changed into descriptions
     By merging the activity description table we will insert this information
     The column V1 - activity code - exists in both sides and will do the magic
     After merging it can be dropped
@@ -70,20 +72,8 @@ Script Explanation:
 	## Join column V1 was very useful but now can be dropped
 	dtJoin <- select(dtJoin, -V1)
 
-10 - A frame with global mean and sd for each variable is requested
-     We will do this by creating a vector with each statistic and joining them in a frame
-	## Generating the table with only the global statistics
-	##
-	## First creating 2 vectors, one for each statistic
-	means <- sapply(dtJoin[,3:563],mean)
-	sds <- sapply(dtJoin[,3:563],sd)
-	## Now joining the 2 and getting the desired table
-	measureStats <- data.frame(means,sds)
-	## Better names pay off!
-	names(measureStats) <- c("mean","std dev")
-
-11 - To have statistics for groups of subject-activity we need to ... group them
-     A new grouped frame is to be created
+11 - To have statistics for groups of subject-activity we grouped them.
+     A new grouped data frame was created
 	## Creating a grouped frame for the remaining steps
 	dtJoinG <- group_by( dtJoin, .dots = c("subject", "activityDesc"))
 
